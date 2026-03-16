@@ -23,10 +23,28 @@ contenu_md3 = lire_fichier_md(os.path.join(chemin_dossier, "expli3.md"))
 
 #layout
 app.layout = dbc.Container([
-    # Titre de la page
     dbc.Row([
-        dbc.Col(html.H1("Présentation de dash", className="text-center my-4"), width=12)
-    ]),
+        dbc.Col([
+            
+            html.Div([
+                
+                html.H1("Présentation de dash", 
+                        className="text-center text-white fw-bold py-5",
+                        style={
+                            
+                            'text-shadow': '3px 3px 6px rgba(0,0,0,0.7)' 
+                        })
+            ], 
+            # Style CSS pour l'image rouge
+            style={
+                'background-image': 'url("/assets/dash.jpg")',
+                'background-size': 'cover',       
+                'background-position': 'center',  
+                'width': '100%',                  
+                'border-radius': '5px',           
+            })
+        ], width=12)
+    ], className="mb-4"), 
 
     # Composant Accordéon
     dbc.Row([
