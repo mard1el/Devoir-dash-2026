@@ -1,78 +1,57 @@
 # Importation des bibliothèques
-from dash import Dash, dash_table, dcc, html, Input, Output
+from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
 import pandas as pd
 
-# Chargement des données
-df = pd.read_csv("datas/avocado.csv") 
-df.drop(["4046", "4225", "Unnamed: 0", "4770" ,"Small Bags", "Large Bags", "XLarge Bags"], axis=1, inplace=True )      
+# Chargement des données pour alimenter les menus déroulants
+df = pd.read_csv("datas/avocado.csv")
+
+# Récupération de la liste des régions uniques et triées
+regions_disponibles = sorted(df['region'].dropna().unique())
 
 # Création de l'application Dash
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Création du layout
+# Création du layout 
 app.layout = dbc.Container([
-    # Ligne pour le titre
+    # Titre de la page
     dbc.Row([
         dbc.Col([
-            html.H1("Tableau de données sur les avocats", className="text-center my-4")
+            html.H1("Prix moyen dans le temps", className="text-center my-4")
         ], width=12)
     ]),
+
     
-    # Ligne pour les menus déroulants
     dbc.Row([
-        # Menu déroulant pour la région
+        #Première région à gauche
         dbc.Col([
-            html.Label("Sélectionnez une région :"),
+            html.Label("Sélectionnez la première région :"),
             dcc.Dropdown(
-                id='region-dropdown',
-                options=[{'label': r, 'value': r} for r in sorted(df['region'].dropna().unique())],
-                value=df['region'].dropna().unique()[0],
+                id='region1-dropdown',
+                options=[{'label': r, 'value': r} for r in regions_disponibles],
+                value=regions_disponibles[0], # Première région par défaut
                 clearable=False
-            )
-        ], width=6),
-        
-        # Menu déroulant pour le type d'avocat
+            ),
+            #premier graphique
+            dcc.Graph(id='graph-region1')
+        ], width=6), 
+
+        #Deuxième région à droite
         dbc.Col([
-            html.Label("Sélectionnez un type :"),
+            html.Label("Sélectionnez la deuxième région :"),
             dcc.Dropdown(
-                id='type-dropdown',
-                options=[{'label': t, 'value': t} for t in sorted(df['type'].dropna().unique())],
-                value=[df['type'].dropna().unique()[0]], 
-                multi=True,
+                id='region2-dropdown',
+                options=[{'label': r, 'value': r} for r in regions_disponibles],
+                
+                value=regions_disponibles[1] if len(regions_disponibles) > 1 else regions_disponibles[0], 
                 clearable=False
-            )
+            ),
+            #deuxième graphique
+            dcc.Graph(id='graph-region2')
         ], width=6)
-    ], className="mb-4"), 
-    
-    # Ligne pour le tableau de données
-    dbc.Row([
-        dbc.Col([
-            dash_table.DataTable(
-                id="our-data-table",
-                page_size=10,
-                style_table={'overflowX': 'auto'}
-            )
-        ], width=12)
     ])
-])
+], fluid=True) 
 
-
-@app.callback(
-    [Output('our-data-table', 'data'),
-     Output('our-data-table', 'columns')],
-    [Input('region-dropdown', 'value'),
-     Input('type-dropdown', 'value')]
-)
-def update_table(selected_region, selected_type):
-    
-    filtered_df = df[(df['region'] == selected_region) & (df['type'].isin(selected_type))]
-    
-    data = filtered_df.to_dict('records')
-    columns = [{"name": i, "id": i} for i in filtered_df.columns]
-    
-    return data, columns
-
-# Lancement de l'application
+# Lancement de l'application pour tester l'affichage
 if __name__ == "__main__":
     app.run(debug=True)
